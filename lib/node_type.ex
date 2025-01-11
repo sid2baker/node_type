@@ -96,16 +96,17 @@ defmodule NodeType do
       """
 
     quote do
-      def start_link(node) do
-        GenServer.start_link(__MODULE__, node, name: via_tuple(node.id))
+      def start_link(opts) do
+        name = Keyword.get(opts, :name)
+        node = Keyword.get(opts, :node)
+
+        GenServer.start_link(__MODULE__, node, name: name)
       end
 
       def init(node) do
         :ok = subscribe(node.id)
         setup(node)
       end
-
-      defp via_tuple(id), do: {:via, Registry, {NodeEx.Runtime.Registry, id}}
 
       def __node_definition__() do
         unquote(node_definition)
