@@ -110,6 +110,10 @@ defmodule NodeType do
       def __node_definition__() do
         unquote(node_definition)
       end
+
+      def __mix_recompile__?() do
+        true
+      end
     end
   end
 
