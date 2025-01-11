@@ -55,7 +55,7 @@ defmodule NodeType do
     template =
       case Module.get_attribute(env.module, :inline_template) do
         nil ->
-          File.read!(Path.join([asset_path, "template.html.eex"]))
+          EEx.eval_file(Path.join([asset_path, "template.html.eex"]))
 
         inline_template ->
           inline_template
@@ -64,7 +64,7 @@ defmodule NodeType do
     javascript =
       case Module.get_attribute(env.module, :inline_javascript) do
         nil ->
-          File.read!(Path.join([asset_path, "node.js.eex"]))
+          EEx.eval_file(Path.join([asset_path, "node.js.eex"]))
 
         inline_javascript ->
           inline_javascript
@@ -73,7 +73,7 @@ defmodule NodeType do
     help_text =
       case Module.get_attribute(env.module, :inline_help_text) do
         nil ->
-          File.read!(Path.join([asset_path, "help.html.eex"]))
+          EEx.eval_file(Path.join([asset_path, "help.html.eex"]))
 
         inline_help_text ->
           inline_help_text
