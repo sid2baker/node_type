@@ -22,7 +22,6 @@ defmodule NodeType.MixProject do
   defp elixirc_paths(_), do: ["lib"]
 
   defp deps do
-    [
-    ]
+    []
   end
 end

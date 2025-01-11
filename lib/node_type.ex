@@ -7,6 +7,10 @@ defmodule NodeType do
   """
   @callback setup(node :: map()) :: {:ok, map()}
 
+  @doc """
+  """
+  @callback subscribe(node_id :: String.t()) :: :ok
+
   defmacro __using__(opts) do
     quote location: :keep, bind_quoted: [opts: opts] do
       @behaviour NodeType
@@ -45,32 +49,51 @@ defmodule NodeType do
 
   defmacro __before_compile__(env) do
     opts = Module.get_attribute(env.module, :node_type_opts)
+    node_name = opts[:name] || __to_node_name__(__MODULE__)
     asset_path = opts[:asset_path]
 
-    inline_template = Module.get_attribute(env.module, :inline_template)
-    inline_javascript = Module.get_attribute(env.module, :inline_javascript)
-    inline_help_text = Module.get_attribute(env.module, :inline_help_text)
+    template =
+      case Module.get_attribute(env.module, :inline_template) do
+        nil ->
+          File.read!(Path.join([asset_path, "template.html.eex"]))
+
+        inline_template ->
+          inline_template
+      end
+
+    javascript =
+      case Module.get_attribute(env.module, :inline_javascript) do
+        nil ->
+          File.read!(Path.join([asset_path, "node.js.eex"]))
+
+        inline_javascript ->
+          inline_javascript
+      end
+
+    help_text =
+      case Module.get_attribute(env.module, :inline_help_text) do
+        nil ->
+          File.read!(Path.join([asset_path, "help.html.eex"]))
+
+        inline_help_text ->
+          inline_help_text
+      end
 
     node_definition =
-      if asset_path do
-        File.read!(asset_path)
-      else
-        module_name = __to_node_name__(__MODULE__)
-
-        """
-        <script type="text/javascript">
-        RED.nodes.registerType("#{module_name}",
-        #{inline_javascript}
-        );
-        </script>
-        <script type="text/html" data-template-name="#{module_name}">
-        #{inline_template}
-        </script>
-        <script type="text/html" data-help-name="#{module_name}">
-        #{inline_help_text}
-        </script>
-        """
-      end
+      """
+      <script type="text/javascript">
+      {
+        #{javascript}
+        RED.nodes.registerType("#{node_name}", node);
+      }
+      </script>
+      <script type="text/html" data-template-name="#{node_name}">
+      #{template}
+      </script>
+      <script type="text/html" data-help-name="#{node_name}">
+      #{help_text}
+      </script>
+      """
 
     quote do
       def start_link(node) do
@@ -78,7 +101,7 @@ defmodule NodeType do
       end
 
       def init(node) do
-        :ok = NodeEx.MQTT.Server.subscribe(["notification/node/#{node.id}"])
+        :ok = subscribe(node.id)
         setup(node)
       end
 
