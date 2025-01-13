@@ -22,6 +22,8 @@ defmodule NodeType.MixProject do
   defp elixirc_paths(_), do: ["lib"]
 
   defp deps do
-    []
+    [
+      {:beamred, path: "../beamred"}
+    ]
   end
 end

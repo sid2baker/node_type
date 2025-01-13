@@ -1,4 +1,4 @@
-defmodule NodeType do
+defmodule BeamRED.NodeType do
   @moduledoc ~S'''
 
   '''
@@ -113,7 +113,7 @@ defmodule NodeType do
       end
 
       def __mix_recompile__?() do
-        true
+        false
       end
     end
   end
